@@ -1,5 +1,8 @@
-# Backup files from freecad
-*.bak
+# CAD files that I nominally don't want to track
+*.FCBak
+*.stl
+*.gcode
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
