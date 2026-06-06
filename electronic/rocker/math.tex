@@ -1,0 +1,137 @@
+\documentclass{article}
+\usepackage{circuitikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+\begin{figure}
+\begin{center}
+\begin{circuitikz}
+    \draw (0,4) to [ R, l_=$R_1$] (0,2)
+    to[ american voltage source, l_=$5$V ] (0, 0)
+    to [ short ] (6, 0)
+    to [ short ] (6, 4)
+    to [ short ] (5.5, 4);
+    \draw (2.5,4) to [short] (2.5,5)
+    to [short] (3, 5) 
+    to [ closing switch, l_=$s_a$ ] (4, 5)
+    to [ R, l_=$R_a$ ] (5.5, 5)
+    to [ short ] (5.5, 4);
+    to [ short ] (5.5, 4);
+    \draw (2.5,4) to [short] (2.5,3)
+    to [short] (3, 3) 
+    to [ closing switch, l_=$s_b$ ] (4, 3)
+    to [ R, l_=$R_b$ ] (5.5, 3)
+    to [ short ] (5.5, 4);
+    \draw (2.5,4) to [ short ] (-1,4);
+    \draw (2,4) to [ R, l_=$R_2$ ] (2,0);
+    \draw (0,4) to [short] (-2,4)
+    to [open, *-*, l_=$V_{\mathrm{out}}$] (-2,0)
+    to [short] (0,0);
+
+\end{circuitikz}
+\end{center}
+\end{figure}
+
+\section{Output Voltage}
+The output voltage of the above circuit has a different value depending on the
+state of the switches.
+\subsection{$s_a$ open, $s_b$ open}
+In this case, there is only one equation to solve:
+
+\begin{align}
+    0 & = 5 - IR_1 - IR_2 \notag \\
+    I(R_1+R_2) &= 5 \notag \\
+    I &= \frac{5}{R_1+R_2} 
+\end{align}
+
+Then substituting the result to find $V_\mathrm{out}$:
+\begin{align}
+V_\mathrm{out} &= IR_2 \notag \\
+\therefore V_\mathrm{out} &= \frac{5R_2}{R_1+R_2}
+\end{align}
+
+\subsection{$s_a$ closed, $s_b$ open}
+Now we have to solve for two loops simultaneously:
+
+\begin{align}
+    \left[\begin{array}{c}
+        5 \\
+        0
+    \end{array} \right] & = \left[ \begin{array}{cc}
+        R_1+R_2 & -R_2 \\
+        -R_2 & R_2 + R_a \\
+    \end{array}\right] \left[\begin{array}{c}
+        I_1 \\
+        I_2
+    \end{array} \right] \notag \\
+    \frac{1}{R_1R_2 + R_1R_a + R_2R_a}\left[ \begin{array}{cc}
+        R_2 + R_a & R_2 \\
+        R_2 & R_1+R_2 \\
+    \end{array}\right] \left[\begin{array}{c}
+        5 \\
+        0
+    \end{array} \right] & =  \left[\begin{array}{c}
+        I_1 \\
+        I_2
+    \end{array} \right] 
+\end{align}
+
+And we are only concerned with $V_\mathrm{out}$, so:
+\begin{align}
+    V_\mathrm{out} & = R_2(I_1 - I_2) \\
+    & = \left[\begin{array}{c c}
+    R_2 & -R_2
+    \end{array}\right]\left[\begin{array}{c}
+        I_1 \\
+        I_2
+    \end{array} \right] \\
+    &= \frac{1}{R_1R_2 + R_1R_a + R_2R_a} \left[\begin{array}{c c}
+    R_2 & -R_2
+    \end{array}\right]\left[ \begin{array}{cc}
+        R_2 + R_a & R_2 \\
+        R_2 & R_1+R_2 \\
+    \end{array}\right] \left[\begin{array}{c}
+        5 \\
+        0
+    \end{array} \right] \\
+    &= \frac{5R_2(R_2+R_a) - 5R_2^2}{R_1R_2 + R_1R_a + R_2R_a} \\
+    &= \frac{5R_2R_a}{R_1R_2 + R_1R_a + R_2R_a}
+\end{align}
+
+\subsection{$s_a$ open, $s_b$ closed}
+Clearly, this is the same as the previous calculation except with $s_b$ closed
+and $s_a$ open. Therefore:
+$$
+V_\mathrm{out} = \frac{5R_2R_b}{R_1R_2 + R_1R_b + R_2R_b}
+$$
+
+\section{Operating principle}
+Now, ideally we can choose $R_1,R_2,R_a,R_b$ such that we have the desired
+output voltages in the specified switch states.
+
+We would like to have:
+
+\begin{center}
+\begin{tabular}{cc|c}
+    $s_a$ & $s_b$ & $V_\mathrm{vout}$ \\ \hline
+    OPEN & OPEN & 4.0 V \\
+    CLOSED & OPEN & 2.5 V \\
+    OPEN & CLOSED & 1.0 V
+\end{tabular}
+\end{center}
+
+Optimising for these targets (see \verb|./optimise.py|), and keeping $R_1$ fixed (arbitrarily) at 3.3k$\Omega$,
+we get a solution of:
+\begin{center}
+\begin{tabular}{c|c}
+    Component & Value \\ \hline
+    $R_1$ & $3.3$ k$\Omega$ \\
+    $R_2$ & $13.2$ k$\Omega$ \\
+    $R_a$ & $4.4$ k$\Omega$ \\
+    $R_b$ & $880$ $\Omega$
+\end{tabular}
+\end{center}
+
+This was verified in LTSpice.
+\end{document}
